@@ -1,0 +1,34 @@
+---
+
+# Add APT key for Debian-based OS
+- name: Install key for {{ add_repo_name }} repo (apt)
+  apt_key:
+    state: present
+    url: "{{ add_repo_url_key }}"
+  when: ansible_os_family == "Debian"
+
+# Add YUM key for RedHat-based OS
+- name: Install key for {{ add_repo_name }} repo (rpm)
+  rpm_key:
+    state: present
+    key: "{{ add_repo_url_key }}"
+  when: ansible_os_family == "RedHat"
+
+# Add APT repo for Debian-based OS
+- name: Add {{ add_repo_name }} repo (apt)
+  apt_repository:
+    state: present
+    repo: "{{ add_repo_definition }}"
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+
+# Add YUM repo for RedHat-based OS
+- name: Add {{ add_repo_name }} repo (yum)
+  yum_repository:
+    state: present
+    name: "{{ add_repo_name }}"
+    description: "Repository for {{ add_repo_name }} packages"
+    baseurl: "{{ add_repo_definition }}"
+    gpgcheck: yes
+    enabled: yes
+  when: ansible_os_family == "RedHat"

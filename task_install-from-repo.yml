@@ -1,0 +1,17 @@
+---
+
+# Install list of packages from APT for Debian-based OS
+- name: Install latest packages from repo (apt)
+  apt:
+    state: present
+    name: "{{ item }}"
+  when: ansible_os_family == "Debian"
+  with_items: "{{ install_from_repo_packages }}"
+
+# Install list of packages from YUM for RedHat-based OS
+- name: Install latest packages from repo (yum)
+  yum:
+    state: present
+    name: "{{ item }}"
+  when: ansible_os_family == "RedHat"
+  with_items: "{{ install_from_repo_packages }}"

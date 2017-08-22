@@ -1,0 +1,17 @@
+---
+
+# Update APT cache and perform "smart" dist-upgrade
+- name: Update OS (apt)
+  apt:
+    update_cache: yes
+    cache_valid_time: 86400 #seconds, 86400s = 1d
+    upgrade: dist
+  when: ansible_os_family == "Debian"
+
+# Update YUM cache and perform upgrade
+- name: Update OS (yum)
+  yum:
+    update_cache: yes
+    name: "*"
+    state: latest
+  when: ansible_os_family == "RedHat"

@@ -1,0 +1,121 @@
+# Installs software for RedHat & Debian family from packages defined in URLs
+# Assumes hash files available under the same URL with *.{{install_from_pkgs_hash}}
+# sufix. If {{install_from_pkgs_hash}} is not defined, hashes are not obtained
+# and not verified.
+#
+#  Usage example
+#
+#  tasks:
+#    - include: tasks/task_install-from-pkgs.yml
+#      vars:
+#        install_from_pkgs_debug: true
+#        install_from_pkgs_hash: "sha1"
+#        install_from_pkgs_cachedir: "/tmp"
+#        install_from_pkgs_urls:
+#          - "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-5.5.0-amd64.deb"
+#          - "https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-5.5.1-amd64.deb"
+---
+# Obtain original hashes for packages
+- block:
+    - name: "Ensure hash files absent"
+      file:
+        path: "{{ install_from_pkgs_cachedir }}/{{ item | basename }}.{{ install_from_pkgs_hash }}"
+        state: absent
+      with_items: "{{ install_from_pkgs_urls }}"
+
+    - name: "Download original hash files"
+      get_url:
+        url: "{{ item }}.{{ install_from_pkgs_hash }}"
+        dest: "{{ install_from_pkgs_cachedir }}/{{ item | basename }}.{{ install_from_pkgs_hash }}"
+        force: yes
+      with_items: "{{ install_from_pkgs_urls }}"
+
+    - name: "Read original hash files"
+      command: "cat {{ install_from_pkgs_cachedir }}/{{ item | basename }}.{{ install_from_pkgs_hash }}"
+      register: output_hashes
+      with_items: "{{ install_from_pkgs_urls }}"
+
+    - name: "Construct list with hash files metadata and content"
+      set_fact:
+        list_hashes: "{{ output_hashes | json_query(test_query) }}"
+      vars:
+        test_query: "results[*].{hash_path: cmd[1], hash_content: stdout, hash_url: item}"
+  when: "install_from_pkgs_hash is defined"
+
+- name: "Check if packages already exist on disk and get their hashes"
+  stat:
+    path: "{{ install_from_pkgs_cachedir }}/{{ item | basename }}"
+    checksum_algorithm: "{{ install_from_pkgs_hash | default('sha1') }}"
+    get_checksum: yes
+  register: output_stats
+  with_items: "{{ install_from_pkgs_urls }}"
+
+# Generate list of package metadata with check results
+- name: "Construct simple list with package files check results"
+  set_fact:
+    list_files: "{{ output_stats | json_query(test_query) }}"
+  vars:
+    test_query: "results[*].{ file_url: item, file_path: invocation.module_args.path, file_exists: stat.exists, file_hash: stat.checksum }"
+
+# Generate temporary list with both file metadata, hash and compare expected and actual hash
+- block:
+  - name: "Join url list with hash file content"
+    set_fact:
+      tmp_f:
+        expected_hash: "{{ list_hashes | json_query(\"[?hash_url=='\" + item.file_url + \"'].hash_content\") | join('') }}"
+        hashes_match: "{{ list_hashes | json_query(\"[?hash_url=='\" + item.file_url + \"'].hash_content\") | join('') == item.file_hash}}"
+    with_items: "{{ list_files }}"
+    register: tmp_files
+
+  - set_fact:
+      tmp_f: "{{ item.item | combine(item.ansible_facts.tmp_f) }}"
+    with_items: "{{ tmp_files.results }}"
+    register: tmp_files
+
+  - set_fact:
+      urls_with_hashes: "{{ tmp_files.results | map(attribute='ansible_facts.tmp_f') | list }}"
+  when: "install_from_pkgs_hash is defined"
+
+# If hashes available, download packages to disk if do not exist and verify hash
+- name: "If hashes available and packages not present or not matching, download packages and verify again"
+  get_url:
+    url: "{{ item.file_url }}"
+    dest: "{{ item.file_path }}"
+    checksum: "{{ install_from_pkgs_hash }}:{{ item.expected_hash }}"
+    force: "{{ not item.hashes_match }}"
+  with_items: "{{ urls_with_hashes }}"
+  when: "install_from_pkgs_hash is defined"
+
+# If no hashes defined, just download packages to disk from original list
+- name: "If no hashes available, just download packages"
+  get_url:
+    url: "{{ item.file_url }}"
+    dest: "{{ item.file_path }}"
+  with_items: "{{ list_files }}"
+  when: "install_from_pkgs_hash is not defined"
+
+# DEBUG
+- block:
+  - debug:
+      var: urls_with_hashes
+    when: "install_from_pkgs_hash is defined"
+  - debug:
+      var: list_files
+    when: "install_from_pkgs_hash is not defined"
+  when: install_from_pkgs_debug
+
+# Install .deb packages from disk
+- name: "Install packages from disk (.deb)"
+  apt:
+    deb: "{{ install_from_pkgs_cachedir }}/{{ item | basename }}"
+    state: present
+  when: ansible_os_family == "Debian" and not install_from_pkgs_debug
+  with_items: "{{ install_from_pkgs_urls }}"
+
+# Install .rpm packages from disk
+- name: "Install packages from disk (.rpm)"
+  yum:
+    name: "{{ install_from_pkgs_cachedir }}/{{ item | basename }}"
+    state: present
+  when: ansible_os_family == "RedHat" and not install_from_pkgs_debug
+  with_items: "{{ install_from_pkgs_urls }}"
