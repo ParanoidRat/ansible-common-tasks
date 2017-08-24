@@ -26,7 +26,7 @@
 #
 ---
 # Go through template list and notify handler upon completion (if defined)
-- name: Copy files to target
+- name: Expand templates on target
   template:
     src:      "{{ item.src }}"
     dest:     "{{ item.dest }}"
@@ -34,6 +34,6 @@
     group:    "{{ item.group }}"
     mode:     "{{ item.mode }}"
     validate: "{{ item.validate }}"
-    backup:   "{{ item.mode }}"
+    backup:   "{{ item.backup }}"
   with_items: "{{ expand_templates_list }}"
   notify: "{{ expand_templates_handler | default(omit) }}"

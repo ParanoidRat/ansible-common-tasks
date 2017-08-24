@@ -1,4 +1,44 @@
-# Installs software for RedHat & Debian family from existing repository
+# Install specific version of packages from existing repository for either RedHat
+# or Debian family OS.
+#
+# Version is specified as
+#   - package=1.1 for Debian
+#   - package-1.1 for RedHat
+# if no version is specified, latest is installed
+#
+# Additionally for Debian-based OS, pins version in "/etc/apt/preferences.d"
+#
+# NOTE: man apt_preferences
+#     How APT Interprets Priorities
+#        Priorities (P) assigned in the APT preferences file must be positive or
+#        negative integers. They are interpreted as follows (roughly speaking):
+#
+#         P >= 1000
+#            causes a version to be installed even if this constitutes a
+#            downgrade of the package
+#
+#        990 <= P < 1000
+#            causes a version to be installed even if it does not come from the
+#            target release, unless the installed version is more recent
+#
+#        500 <= P < 990
+#            causes a version to be installed unless there is a version available
+#            belonging to the target release or the installed version is more recent
+#
+#        100 <= P < 500
+#            causes a version to be installed unless there is a version available
+#            belonging to some other distribution or the installed version is more
+#            recent
+#
+#        0 < P < 100
+#            causes a version to be installed only if there is no installed
+#            version of the package
+#
+#        P < 0
+#            prevents the version from being installed
+#
+#        P = 0
+#            has undefined behaviour, do not use it.
 #
 #  Usage example
 #
@@ -13,6 +53,16 @@
     state: present
     name: "{{ item }}"
   when: ansible_os_family == "Debian"
+  with_items: "{{ install_from_repo_packages }}"
+
+- name: Pin packages at specified versions if needed (apt)
+  copy:
+    dest: "/etc/apt/preferences.d/{{ item.split('=')[0] }}"
+    content: |
+      Package: {{ item.split('=')[0] }}
+      Pin: version {{ item.split('=')[1] }}
+      Pin-Priority: 1010
+  when: ansible_os_family == "Debian" and item.split('=')[1] is defined
   with_items: "{{ install_from_repo_packages }}"
 
 # Install list of packages from YUM for RedHat-based OS
