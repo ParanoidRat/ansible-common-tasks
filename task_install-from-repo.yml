@@ -6,11 +6,7 @@
 #    - include: task_install-from-repo.yml
 #      vars:
 #        install_from_repo_packages: "{{ common_pkgs + os_specific_pkgs }}"
-#
-#
-#
 ---
-
 # Install list of packages from APT for Debian-based OS
 - name: Install packages from repo (apt)
   apt:
