@@ -47,14 +47,7 @@
 #      vars:
 #        install_from_repo_packages: "{{ common_pkgs + os_specific_pkgs }}"
 ---
-# Install list of packages from APT for Debian-based OS
-- name: Install packages from repo (apt)
-  apt:
-    state: present
-    name: "{{ item }}"
-  when: ansible_os_family == "Debian"
-  with_items: "{{ install_from_repo_packages }}"
-
+# Make sure if specified, package version gets precedence over latest available
 - name: Pin packages at specified versions if needed (apt)
   copy:
     dest: "/etc/apt/preferences.d/{{ item.split('=')[0] }}"
@@ -65,9 +58,22 @@
   when: ansible_os_family == "Debian" and item.split('=')[1] is defined
   with_items: "{{ install_from_repo_packages }}"
 
+# Install list of packages from APT for Debian-based OS
+- name: Install packages from repo (apt)
+  apt:
+    force: yes
+    state: present
+    name: "{{ item }}"
+  when: ansible_os_family == "Debian"
+  with_items: "{{ install_from_repo_packages }}"
+
 # Install list of packages from YUM for RedHat-based OS
 - name: Install packages from repo (yum)
   yum:
+    #
+    #TODO: enable this for Ansible >=2.4 to ensure downgrades
+    #allow_downgrade: yes
+    #
     state: present
     name: "{{ item }}"
   when: ansible_os_family == "RedHat"
