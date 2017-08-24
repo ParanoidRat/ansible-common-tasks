@@ -1,0 +1,5 @@
+---
+
+- name: Configure memory-based tmpfs disk
+  mount: name={{ tmpfs_disk_mount }} src=tmpfs fstype=tmpfs state=mounted opts=size={{ tmpfs_disk_size }}
+  notify: "{{ tmpfs_disk_handler | default(omit) }}"
