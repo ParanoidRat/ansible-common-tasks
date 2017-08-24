@@ -1,0 +1,35 @@
+# Copies list of files to target host and upon completion notify
+# {{ copy_files_handler }} if defined
+#
+#  Usage example
+#
+#   handlers:
+#     - name: Restart service
+#       debug:
+#         msg: Service restarted
+#
+#   tasks:
+#     - include: task_copy_files.yml
+#       vars:
+#         copy_files_handler: "Restart service"
+#         copy_files_list: [
+#           {
+#             src:   "/source/file.1",
+#             dest:  "/target/file.1",
+#             owner: "user",
+#             group: "group",
+#             mode:  644
+#           }
+#         ]
+#
+---
+# Go through file list and upon completion notify handler if defined
+- name: Copy files to target
+  copy:
+    src:   "{{ item.src }}"
+    dest:  "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode:  "{{ item.mode }}"
+  with_items: "{{ copy_files_list }}"
+  notify: "{{ copy_files_handler | default(omit) }}"

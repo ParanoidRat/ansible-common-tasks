@@ -1,0 +1,39 @@
+# Expand temlates to target host and upon completion notify
+# {{ expand_templates_handler }} if defined
+#
+#  Usage example
+#
+#   handlers:
+#     - name: Restart service
+#       debug:
+#         msg: Service restarted
+#
+#   tasks:
+#     - include: expand_templates_files.yml
+#       vars:
+#         expand_templates_handler: "Restart service"
+#         expand_templates_list: [
+#           {
+#             src:   "/source/template.j2",
+#             dest:  "/target/config.cfg",
+#             owner: "user",
+#             group: "group",
+#             mode:  644,
+#             validate: "/usr/bin/validate.sh %s",
+#             backup: yes
+#           }
+#         ]
+#
+---
+# Go through template list and notify handler upon completion (if defined)
+- name: Copy files to target
+  template:
+    src:      "{{ item.src }}"
+    dest:     "{{ item.dest }}"
+    owner:    "{{ item.owner }}"
+    group:    "{{ item.group }}"
+    mode:     "{{ item.mode }}"
+    validate: "{{ item.validate }}"
+    backup:   "{{ item.mode }}"
+  with_items: "{{ expand_templates_list }}"
+  notify: "{{ expand_templates_handler | default(omit) }}"
