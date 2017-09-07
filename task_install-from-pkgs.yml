@@ -107,15 +107,15 @@
 # Install .deb packages from disk
 - name: "Install packages from disk (.deb)"
   apt:
-    deb: "{{ install_from_pkgs_cachedir }}/{{ item | basename }}"
+    deb: "{{ item.file_path }}"
     state: present
-  when: ansible_os_family == "Debian" and not install_from_pkgs_debug
-  with_items: "{{ install_from_pkgs_urls }}"
+  when: item.file_path[-4:] == ".deb" and ansible_os_family == "Debian" and not install_from_pkgs_debug
+  with_items: "{{ list_files }}"
 
 # Install .rpm packages from disk
 - name: "Install packages from disk (.rpm)"
   yum:
-    name: "{{ install_from_pkgs_cachedir }}/{{ item | basename }}"
+    name: "{{ item.file_path }}"
     state: present
-  when: ansible_os_family == "RedHat" and not install_from_pkgs_debug
-  with_items: "{{ install_from_pkgs_urls }}"
+  when: item.file_path[-4:] == ".rpm" and ansible_os_family == "RedHat" and not install_from_pkgs_debug
+  with_items: "{{ list_files }}"
