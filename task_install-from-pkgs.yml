@@ -47,7 +47,7 @@
   when: ansible_os_family == "Debian" and not install_from_pkgs_debug
   with_items: "{{ src_list }}"
   loop_control:
-    label: "{{ item.url }}"
+    label: "{{ install_from_pkgs_cachedir }}/{{ item.url | basename }}"
 
 # Install .rpm packages from disk
 - name: "Install packages from disk (.rpm)"
@@ -57,4 +57,4 @@
   when: ansible_os_family == "RedHat" and not install_from_pkgs_debug
   with_items: "{{ src_list }}"
   loop_control:
-    label: "{{ item.url }}"
+    label: "{{ install_from_pkgs_cachedir }}/{{ item.url | basename }}"
