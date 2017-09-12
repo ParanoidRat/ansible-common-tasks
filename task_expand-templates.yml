@@ -12,17 +12,14 @@
 #     - include: expand_templates.yml
 #       vars:
 #         expand_templates_handler: "Restart service"
-#         expand_templates_list: [
-#           {
-#             src:   "/source/template.j2",
+#         expand_templates_list:
+#           - src:   "/source/template.j2",
 #             dest:  "/target/config.cfg",
 #             owner: "user",
 #             group: "group",
 #             mode:  644,
 #             validate: "/usr/bin/validate.sh %s",
 #             backup: yes
-#           }
-#         ]
 #
 ---
 # Go through template list and notify handler upon completion (if defined)
@@ -33,7 +30,9 @@
     owner:    "{{ item.owner }}"
     group:    "{{ item.group }}"
     mode:     "{{ item.mode }}"
-    validate: "{{ item.validate }}"
+    validate: "{{ item.validate | default(omit) }}"
     backup:   "{{ item.backup }}"
   with_items: "{{ expand_templates_list }}"
+  loop_control:
+    label: "{{ item.src }}"
   notify: "{{ expand_templates_handler | default(omit) }}"

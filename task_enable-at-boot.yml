@@ -9,7 +9,7 @@
 #          - "rsyslog"
 ---
 # Enable service at boot and start it
-- name: "Enable service at boot and start :: {{ item }}"
+- name: "Enable and start services at boot "
   service:
     name: "{{ item }}"
     enabled: yes
