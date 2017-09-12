@@ -1,0 +1,17 @@
+# Enable set of services to start at boot and ensure they are running.
+#
+#  Usage example
+#
+#  tasks:
+#    - include: tasks/task_enable-at-boot.yml
+#      vars:
+#        enable_at_boot_svc_list:
+#          - "rsyslog"
+---
+# Enable service at boot and start it
+- name: "Enable service at boot and start :: {{ item }}"
+  service:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  with_items: "{{ enable_at_boot_svc_list }}"

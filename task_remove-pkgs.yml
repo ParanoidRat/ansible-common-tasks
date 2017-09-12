@@ -1,0 +1,21 @@
+# Deinstalls software for RedHat & Debian family OSes.
+#
+#  Usage example
+#
+#  tasks:
+#    - include: tasks/task_remove-pkgs.yml
+#      vars:
+#        remove_pkgs_list:
+  #        - "mc"
+---
+# Set package environment type
+- name: "Set package environment type"
+  set_fact:
+    os_pkg_env: "{% if ansible_os_family=='Debian' %}apt{% elif ansible_os_family=='RedHat' %}yum{% else %}UNKNOWN{% endif %}"
+
+# Remove packages with generic OS package manager
+- name: "Remove packages ({{ os_pkg_env }})"
+  package:
+    name: "{{ item }}"
+    state: absent
+  with_items: "{{ remove_pkgs_list }}"
