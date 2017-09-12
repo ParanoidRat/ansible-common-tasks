@@ -16,17 +16,17 @@
 #            type: "deb"
 #            hash: "sha1:fe65b5242fba0a0360900ea72c3dda362a01ba8c"
 ---
-# Set proper environment type
-- name: "Set environment type"
+# Set proper package environment type
+- name: "Detect package evironment type"
   set_fact:
-    os_env: "{% if ansible_os_family=='Debian' %}deb{% elif ansible_os_family=='RedHat' %}rpm{% else %}UNKNOWN{% endif %}"
+    os_pkg_type: "{% if ansible_os_family=='Debian' %}deb{% elif ansible_os_family=='RedHat' %}rpm{% else %}UNKNOWN{% endif %}"
 
 # Generate list of os-specific packages
-- name: "Get OS-specific packages (.{{ os_env }})"
+- name: "Get OS-specific packages (.{{ os_pkg_type }})"
   set_fact:
     src_list: "{{ install_from_pkgs_src | json_query(filter_jq) }}"
   vars:
-    filter_jq: "[?type=='{{os_env}}']"
+    filter_jq: "[?type=='{{os_pkg_type}}']"
 
 # Download packages to disk if do not exist and verify hash
 - name: "Download and verify package"
