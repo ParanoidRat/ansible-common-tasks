@@ -22,7 +22,7 @@
     os_pkg_type: "{% if ansible_os_family=='Debian' %}deb{% elif ansible_os_family=='RedHat' %}rpm{% else %}UNKNOWN{% endif %}"
 
 # Generate list of os-specific packages
-- name: "Get OS-specific packages (.{{ os_pkg_type }})"
+- name: "Get OS-specific packages"
   set_fact:
     src_list: "{{ install_from_pkgs_src | json_query(filter_jq) }}"
   vars:
