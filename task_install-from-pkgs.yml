@@ -8,7 +8,7 @@
 #      vars:
 #        install_from_pkgs_debug: yes
 #        install_from_pkgs_cachedir: "/tmp"
-#        install_from_pkgs_src: [
+#        install_from_pkgs_src:
 #          - url:  "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
 #            type: "rpm"
 #            hash: ""
