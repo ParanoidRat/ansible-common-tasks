@@ -22,6 +22,19 @@
 #             backup: yes
 #
 ---
+# Create all destination folders
+- name: Ensure template destinations exist
+  file:
+    path:     "{{ item.dest | dirname }}"
+    owner:    "{{ item.owner }}"
+    group:    "{{ item.group }}"
+    mode:     "{{ item.mode }}"
+    state:    directory
+    recurse:  yes
+  with_items: "{{ expand_templates_list }}"
+  loop_control:
+    label: "{{ item.dest | dirname }}"
+
 # Go through template list and notify handler upon completion (if defined)
 - name: Expand templates on target
   template:
