@@ -18,8 +18,9 @@
 - name: Add {{ add_repo_name }} repo (apt)
   apt_repository:
     state: present
-    repo: "{{ add_repo_definition }}"
+    repo: "{{ item }}"
     update_cache: yes
+  with_items: "{{ add_repo_definition }}"
   when: ansible_os_family == "Debian"
 
 # Add YUM repo for RedHat-based OS
