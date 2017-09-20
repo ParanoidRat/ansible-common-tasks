@@ -12,15 +12,12 @@
 #     - include: task_copy_files.yml
 #       vars:
 #         copy_files_handler: "Restart service"
-#         copy_files_list: [
-#           {
-#             src:   "/source/file.1",
+#         copy_files_list:
+#           - src:   "/source/file.1",
 #             dest:  "/target/file.1",
 #             owner: "user",
 #             group: "group",
 #             mode:  644
-#           }
-#         ]
 #
 ---
 # Go through file list and upon completion notify handler if defined
