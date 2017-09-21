@@ -14,12 +14,12 @@
   copy:
     content: |
       [Service]
-      ExecStart="{{ gen_systemd_unit_exec }}"
+      ExecStart={{ gen_systemd_unit_exec }}
       Restart=always
       TimeoutSec=3
       StandardOutput=syslog
       StandardError=syslog
-      SyslogIdentifier="{{ gen_systemd_unit_name }}"
+      SyslogIdentifier={{ gen_systemd_unit_name }}
       User=root
       Group=root
 
