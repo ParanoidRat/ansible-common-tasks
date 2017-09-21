@@ -9,7 +9,7 @@
 #         msg: Service restarted
 #
 #   tasks:
-#     - include: expand_templates.yml
+#     - import_tasks: expand_templates.yml
 #       vars:
 #         expand_templates_handler: "Restart service"
 #         expand_templates_list:

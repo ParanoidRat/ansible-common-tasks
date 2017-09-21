@@ -3,7 +3,7 @@
 #  Usage example
 #
 #  tasks:
-#    - include: tasks/task_remove-pkgs.yml
+#    - import_tasks: task_remove-pkgs.yml
 #      vars:
 #        remove_pkgs_list:
   #        - "mc"
