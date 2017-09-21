@@ -13,12 +13,12 @@
 #       vars:
 #         expand_templates_handler: "Restart service"
 #         expand_templates_list:
-#           - src:   "/source/template.j2",
-#             dest:  "/target/config.cfg",
-#             owner: "user",
-#             group: "group",
-#             mode:  644,
-#             validate: "/usr/bin/validate.sh %s",
+#           - src:   "/source/template.j2"
+#             dest:  "/target/config.cfg"
+#             owner: "user"
+#             group: "group"
+#             mode:  "u=rw,g=r,o=r"
+#             validate: "/usr/bin/validate.sh %s"
 #             backup: yes
 #
 ---

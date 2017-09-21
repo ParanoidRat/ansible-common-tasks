@@ -13,11 +13,11 @@
 #       vars:
 #         copy_files_handler: "Restart service"
 #         copy_files_list:
-#           - src:   "/source/file.1",
-#             dest:  "/target/file.1",
-#             owner: "user",
-#             group: "group",
-#             mode:  644
+#           - src:   "/source/file.1"
+#             dest:  "/target/file.1"
+#             owner: "user"
+#             group: "group"
+#             mode:  "u=rw,g=r,o=r"
 #
 ---
 # Go through file list and upon completion notify handler if defined
