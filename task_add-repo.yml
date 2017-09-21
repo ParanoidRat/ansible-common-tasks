@@ -1,5 +1,19 @@
+# Adds a repository and corresponding GPG key to the OS. For Debian family repo
+# definition could be milti-line and must include full repo string
+# (e.g. deb <url> release repo). For RedHat family repo definition is a URL.
+#
+# Usage example
+#
+# tasks:
+#   - import_tasks: task_add-repo.yml
+#     vars:
+#       add_repo_name: "Elastic-5.x"
+#       add_repo_url_key: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+#       add_repo_definition:
+#         - deb https://artifacts.elastic.co/packages/5.x/apt stable main
+#         - deb https://artifacts.elastic.co/packages/4.x/apt stable main
+#
 ---
-
 # Add APT key for Debian-based OS
 - name: Install key for {{ add_repo_name }} repo (apt)
   apt_key:
