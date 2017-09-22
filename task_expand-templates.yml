@@ -30,7 +30,7 @@
     group:    "{{ item.group }}"
     mode:     "u=rwx,g=rx,o=rx"
     state:    directory
-    recurse:  yes
+    recurse:  no
   with_items: "{{ expand_templates_list }}"
   loop_control:
     label: "{{ item.dest | dirname }}"
