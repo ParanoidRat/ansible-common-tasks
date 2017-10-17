@@ -39,7 +39,7 @@
   with_file:
   - "{{ sudo_account_ssh_key }}"
 
-- name: "Ensure sudoers.d exists"
+- name: "Ensure /etc/sudoers.d/ exists"
   file:
     path: /etc/sudoers.d
     owner: root
