@@ -5,34 +5,54 @@
 # tasks:
 #   - import_tasks: task_add-sudo-account.yml
 #     vars:
-#       deployment_account: deployer
-#       deployment_account_ssh_keys:
-#         - ./files/deployer_ssh_key.pub
+#       sudo_account: deployer
+#       sudo_uid: 5001
+#       sudo_account_home_dir: /var/home
+#       sudo_account_ssh_key: ./files/deployer_ssh_key.pub
 #
 ---
-- name: "Ensure 'wheel' group exists"
-  group:
-    name: wheel
-    state: present
-
-- name: "Allow 'wheel' to have passwordless sudo"
-  lineinfile:
-    dest: /etc/sudoers
-    state: present
-    regexp: '^%wheel'
-    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
-    validate: visudo -cf %s
-
-- name: "Add deployment account to 'wheel'"
+- name: "Ensure account exists"
   user:
-    name: "{{ deployment_account }}"
-    groups: wheel
-    append: yes
+    name: "{{ sudo_account }}"
+    uid: "{{ sudo_uid }}"
+    home: "{{ sudo_account_home_dir }}/{{ sudo_account }}"
     state: present
     createhome: yes
 
-- name: "Set up authorized keys for the deployer user"
+- name: "Ensure account group exists"
+  group:
+    name: "{{ sudo_account }}"
+    gid: "{{ sudo_uid }}"
+    state: present
+
+- name: "Set up authorized keys for account"
   authorized_key:
-    user: "{{ deployment_account }}"
+    user: "{{ sudo_account }}"
     key: "{{ item }}"
-  with_file: "{{ deployment_account_ssh_keys }}"
+  with_file:
+  - "{{ sudo_account_ssh_key }}"
+
+- name: "Ensure sudoers.d exists"
+  file:
+    path: /etc/sudoers.d
+    owner: root
+    group: root
+    mode: "u=rwx,g=rx,o=rx"
+    state: directory
+
+- name: "Ensure sudoers.d referred in sudoers"
+  lineinfile:
+    dest: /etc/sudoers
+    line: "#includedir /etc/sudoers.d"
+    state: present
+    validate: "/usr/sbin/visudo -cf %s"
+
+- name: "Ensure sudoers.d has directives for account"
+  copy:
+    content: |
+      {{ sudo_account }} ALL=(ALL) NOPASSWD: ALL
+    dest: "/etc/sudoers.d/{{ sudo_account }}"
+    owner: root
+    group: root
+    mode: "u=r,g=r,o="
+    validate: "/usr/sbin/visudo -cf %s"
