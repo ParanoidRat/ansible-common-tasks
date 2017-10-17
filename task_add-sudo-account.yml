@@ -1,33 +1,40 @@
-# Adds a local account to target and makes account part of sudoers
+# Adds a local account to target and makes it part of sudoers
+# through dedicated file at /etc/sudoers.d/
 #
 # Usage example
 #
-# tasks:
-#   - import_tasks: task_add-sudo-account.yml
+# - name: "Deployment account exists and configured"
+#   hosts: all
+#   tasks:
+#   - import_tasks: tasks/task_add-sudo-account.yml
+#     become: yes
 #     vars:
-#       sudo_account: deployer
-#       sudo_uid: 5001
+#       sudo_account_name: deployer
+#       sudo_account_uid: 5001
 #       sudo_account_home_dir: /var/home
-#       sudo_account_ssh_key: ./files/deployer_ssh_key.pub
+#       sudo_account_ssh_key: "./files/ssh-key-deployer.pub"
+#   tags: sudo-account
 #
 ---
+- name: "Ensure account group exists"
+  group:
+    name: "{{ sudo_account_name }}"
+    gid: "{{ sudo_account_uid }}"
+    state: present
+
 - name: "Ensure account exists"
   user:
-    name: "{{ sudo_account }}"
-    uid: "{{ sudo_uid }}"
-    home: "{{ sudo_account_home_dir }}/{{ sudo_account }}"
+    uid: "{{ sudo_account_uid }}"
+    name: "{{ sudo_account_name }}"
+    group: "{{ sudo_account_name }}"
+    home: "{{ sudo_account_home_dir }}/{{ sudo_account_name }}"
+    append: yes
     state: present
     createhome: yes
 
-- name: "Ensure account group exists"
-  group:
-    name: "{{ sudo_account }}"
-    gid: "{{ sudo_uid }}"
-    state: present
-
 - name: "Set up authorized keys for account"
   authorized_key:
-    user: "{{ sudo_account }}"
+    user: "{{ sudo_account_name }}"
     key: "{{ item }}"
   with_file:
   - "{{ sudo_account_ssh_key }}"
@@ -40,7 +47,7 @@
     mode: "u=rwx,g=rx,o=rx"
     state: directory
 
-- name: "Ensure sudoers.d referred in sudoers"
+- name: "Ensure /etc/sudoers.d/ referred in /etc/sudoers"
   lineinfile:
     dest: /etc/sudoers
     line: "#includedir /etc/sudoers.d"
@@ -56,8 +63,8 @@
       # It allows sudo execution without asking for password
       # for the account below
       #
-      {{ sudo_account }} ALL=(ALL) NOPASSWD: ALL
-    dest: "/etc/sudoers.d/{{ sudo_account }}"
+      {{ sudo_account_name }} ALL=(ALL) NOPASSWD: ALL
+    dest: "/etc/sudoers.d/{{ sudo_account_name }}"
     owner: root
     group: root
     mode: "u=r,g=r,o="
