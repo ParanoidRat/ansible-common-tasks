@@ -1,0 +1,38 @@
+# Adds a local account to target and makes account part of sudoers
+#
+# Usage example
+#
+# tasks:
+#   - import_tasks: task_add-sudo-account.yml
+#     vars:
+#       deployment_account: deployer
+#       deployment_account_ssh_keys:
+#         - ./files/deployer_ssh_key.pub
+#
+---
+- name: "Ensure 'wheel' group exists"
+  group:
+    name: wheel
+    state: present
+
+- name: "Allow 'wheel' to have passwordless sudo"
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    validate: visudo -cf %s
+
+- name: "Add deployment account to 'wheel'"
+  user:
+    name: "{{ deployment_account }}"
+    groups: wheel
+    append: yes
+    state: present
+    createhome: yes
+
+- name: "Set up authorized keys for the deployer user"
+  authorized_key:
+    user: "{{ deployment_account }}"
+    key: "{{ item }}"
+  with_file: "{{ deployment_account_ssh_keys }}"
