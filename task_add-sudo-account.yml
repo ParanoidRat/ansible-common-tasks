@@ -19,15 +19,15 @@
 - name: "Ensure account group exists"
   group:
     name: "{{ sudo_account_name }}"
-    gid: "{{ sudo_account_uid }}"
+    gid: "{{ sudo_account_uid | default(omit) }}"
     state: present
 
 - name: "Ensure account exists"
   user:
-    uid: "{{ sudo_account_uid }}"
+    uid: "{{ sudo_account_uid | default(omit) }}"
     name: "{{ sudo_account_name }}"
     group: "{{ sudo_account_name }}"
-    home: "{{ sudo_account_home_dir }}/{{ sudo_account_name }}"
+    home: "{{ sudo_account_home_dir | default('/home') }}/{{ sudo_account_name }}"
     append: yes
     state: present
     createhome: yes
