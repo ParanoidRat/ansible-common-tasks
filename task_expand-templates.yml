@@ -44,7 +44,7 @@
     group:    "{{ item.group }}"
     mode:     "{{ item.mode }}"
     validate: "{{ item.validate | default(omit) }}"
-    backup:   "{{ item.backup }}"
+    backup:   "{{ item.backup | default(omit) }}"
   with_items: "{{ expand_templates_list }}"
   loop_control:
     label: "{{ item.src }}"
