@@ -10,8 +10,8 @@
 #     become: yes
 #     vars:
 #       sudo_account_name: deployer
-#       sudo_account_uid: 5001
-#       sudo_account_home_dir: /var/home
+#       sudo_account_uid: 1001
+#       sudo_account_home_dir: /var/home/deployer
 #       sudo_account_ssh_key: "./files/ssh-key-deployer.pub"
 #   tags: sudo-account
 #
@@ -19,20 +19,25 @@
 - name: "Ensure account group exists"
   group:
     name: "{{ sudo_account_name }}"
-    gid: "{{ sudo_account_uid | default(omit) }}"
     state: present
 
-- name: "Ensure account exists"
+- name: "Get account info, if exists"
+  getent:
+    database: passwd
+    key: "{{ sudo_account_name }}"
+    fail_key: no
+
+- name: "Create account, if doesn't exist"
   user:
     uid: "{{ sudo_account_uid | default(omit) }}"
     name: "{{ sudo_account_name }}"
     group: "{{ sudo_account_name }}"
-    home: "{{ sudo_account_home_dir | default('/home') }}/{{ sudo_account_name }}"
-    append: yes
+    home: "{{ sudo_account_home_dir | default('/home/' + sudo_account_name) }}"
     state: present
     createhome: yes
+  when: getent_passwd[sudo_account_name] | string == "None"
 
-- name: "Set up authorized keys for account"
+- name: "Place authorized keys for account"
   authorized_key:
     user: "{{ sudo_account_name }}"
     key: "{{ item }}"
