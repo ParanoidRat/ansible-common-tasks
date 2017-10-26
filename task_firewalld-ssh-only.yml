@@ -8,12 +8,6 @@
 #     become: yes
 #
 ---
-- name: "Disable and stop firewalld"
-  service:
-    name: firewalld
-    state: stopped
-    enabled: no
-
 - name: "Delete firewalld config dirs"
   file:
     path: "{{ item }}"
@@ -21,6 +15,7 @@
   with_items:
     - /etc/firewalld/zones
     - /etc/firewalld/ipsets
+  when: firewalld_ssh_only_reset
 
 # Generate zone and ipset files for SSH-only access
 - import_tasks: task_expand-templates.yml
@@ -38,15 +33,15 @@
         group: "root"
         mode: "u=rw,g=r,o=r"
 
-- name: "Make SSH-only zone the default"
+- name: "Make DROP zone the default for interfaces"
   lineinfile:
     dest: /etc/firewalld/firewalld.conf
     regexp: '^DefaultZone=(.*)$'
-    line: "DefaultZone=ssh-only"
+    line: "DefaultZone=drop"
     state: present
 
-- name: "Enable and start firewalld"
+- name: "Reload firewalld"
   service:
     name: firewalld
-    state: started
+    state: reloaded
     enabled: yes
