@@ -1,0 +1,33 @@
+# Adds configuration to allow custom service to be accessed from pre-defined
+# ipset
+#
+# Usage example
+#
+#   tasks:
+#   - import_tasks: task_firewalld-allow-svc.yml
+#     become: yes
+#     vars:
+#       port: 22
+#       protocol: tcp
+#       hosts:
+#       - 192.168.1.0/24
+#       - 10.0.0.1/32
+#
+---
+- name: "Allow service :: {{ allow_svc_comment }}"
+  firewalld:
+    rich_rule: "rule family=ipv4 source address={{ item }} port port={{ allow_svc_port }} protocol={{ allow_svc_protocol }} accept"
+    permanent: "{{ allow_svc_permanent | default(no)}}"
+    timeout: "{{ allow_svc_timeout | default(omit) }}"
+    state: "{{ allow_svc_state  | default(enabled) }}"
+  with_items: "{{ allow_svc_hosts }}"
+  loop_control:
+    label: "{{ item }}"
+  notify:
+    - "{{ allow_svc_handler | default(omit) }}"
+
+- name: "Restart firewall"
+  service:
+    name: firewalld
+    state: restarted
+    enabled: yes
