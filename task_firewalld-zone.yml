@@ -1,0 +1,88 @@
+# Configures firewalld to apply DROP zone by default and adds zone with specific
+# services allowed only for client IPs or CIDR nets defined in ipset.
+#
+# With `firewalld_zone_only=yes` deletes all other custom zone and ipset
+# configs from /etc/firewalld/
+#
+# Usage example
+#
+#   tasks:
+#   - import_tasks: task_firewalld-zone.yml
+#     become: yes
+#     vars:
+#       firewalld_zone_only: no
+#       firewalld_zone_name: web
+#       firewalld_zone_short: Web App
+#       firewalld_zone_description: Micro-service exposed to authorized clients
+#       firewalld_zone_svc_list:
+#         - http
+#         - https
+#       firewalld_zone_allowed_list:
+#         - 192.168.1.0/24
+#         - 10.10.10.10
+#
+---
+- name: "Delete firewalld config dirs"
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/firewalld/zones
+    - /etc/firewalld/ipsets
+  when: firewalld_zone_only
+
+- name: "Create firewalld config dirs"
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: "u=rwx,g=rx,o=rx"
+  with_items:
+    - /etc/firewalld/zones
+    - /etc/firewalld/ipsets
+  when: firewalld_zone_only
+
+- name: "Generate zone file :: {{ firewalld_zone_name }}"
+  copy:
+    content: |
+      <?xml version="1.0" encoding="utf-8"?>
+      <zone>
+        <short>{{ firewalld_zone_short }}</short>
+        <description>{{ firewalld_zone_description }}</description>
+        <source ipset="{{ firewalld_zone_name }}-src"/>
+      {% for svc in firewalld_zone_svc_list %}
+        <service name="{{ svc }}"/>
+      {% endfor %}
+      </zone>
+    dest: "/etc/firewalld/zones/{{ firewalld_zone_name }}.xml"
+    owner: "root"
+    group: "root"
+    mode: "u=rw,g=r,o=r"
+
+- name: "Generate ipset file :: {{ firewalld_zone_name }}"
+  copy:
+    content: |
+      <?xml version="1.0" encoding="utf-8"?>
+      <ipset type="hash:ip">
+      {% for src in firewalld_zone_allowed_list %}
+        <entry>{{ src }}</entry>
+      {% endfor %}
+      </ipset>
+    dest: "/etc/firewalld/ipsets/{{ firewalld_zone_name }}-src.xml"
+    owner: "root"
+    group: "root"
+    mode: "u=rw,g=r,o=r"
+
+- name: "Set DROP zone as default for all interfaces"
+  lineinfile:
+    dest: /etc/firewalld/firewalld.conf
+    regexp: '^DefaultZone=(.*)$'
+    line: "DefaultZone=drop"
+    state: present
+
+- name: "Reload firewalld"
+  service:
+    name: firewalld
+    state: reloaded
+    enabled: yes
