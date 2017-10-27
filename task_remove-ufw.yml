@@ -1,0 +1,20 @@
+# Disables iptables in systemd, removes ufw
+#
+# Usage example
+#
+#   tasks:
+#   - import_tasks: task_remove-ufw.yml
+#     become: yes
+#
+---
+- name: "Mask iptables in systemd and stop if in use"
+  systemd:
+    name: iptables
+    masked: yes
+    state: stopped
+
+# Ensure ufw is not installed to avoid conflicts
+- import_tasks: task_remove-pkgs.yml
+  vars:
+    remove_pkgs_list:
+      - ufw
