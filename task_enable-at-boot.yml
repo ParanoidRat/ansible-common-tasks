@@ -1,4 +1,4 @@
-# Enable set of services to start at boot and ensure they are running.
+# Enable set of services to start at boot
 #
 #  Usage example
 #
@@ -8,10 +8,8 @@
 #        enable_at_boot_svc_list:
 #          - "rsyslog"
 ---
-# Enable service at boot and start it
-- name: "Enable and start services at boot "
+- name: "Enable services at boot"
   service:
     name: "{{ item }}"
     enabled: yes
-    state: started
   with_items: "{{ enable_at_boot_svc_list }}"
