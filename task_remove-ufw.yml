@@ -7,11 +7,17 @@
 #     become: yes
 #
 ---
-- name: "Mask iptables in systemd and stop if in use"
+- name: "Stop iptables if in use"
+  service:
+    name: iptables
+    state: stopped
+  register: command_result
+  failed_when: "command_result|failed and ('find' not in command_result.msg and 'found' not in command_result.msg)"
+
+- name: "Mask iptables in systemd"
   systemd:
     name: iptables
     masked: yes
-    state: stopped
 
 # Ensure ufw is not installed to avoid conflicts
 - import_tasks: task_remove-pkgs.yml
