@@ -86,3 +86,8 @@
     name: firewalld
     state: reloaded
     enabled: yes
+
+- name: "Ensure firewalld is running"
+  service:
+    name: firewalld
+    state: started
