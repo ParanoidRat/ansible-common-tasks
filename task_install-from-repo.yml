@@ -70,10 +70,7 @@
 # Install list of packages from YUM for RedHat-based OS
 - name: Install packages from repo (yum)
   yum:
-    #
-    #TODO: enable this for Ansible >=2.4 to ensure downgrades
-    #allow_downgrade: yes
-    #
+    allow_downgrade: yes
     state: present
     name: "{{ item }}"
   when: ansible_os_family == "RedHat"
