@@ -1,0 +1,42 @@
+# Defines a service for firewalld.
+#
+# Usage example
+#
+#   tasks:
+#   - import_tasks: task_firewalld-service.yml
+#     become: yes
+#     vars:
+#       firewalld_svc_name: netflow
+#       firewalld_svc_short: Netflow collector
+#       firewalld_svc_description: Service collecting Netflow reports
+#       firewalld_svc_ports:
+#         - port: 2055
+#           protocol: udp
+#
+---
+- name: "Generate service file :: {{ firewalld_svc_name }}"
+  copy:
+    content: |
+      <?xml version="1.0" encoding="utf-8"?>
+      <service>
+        <short>{{ firewalld_svc_short }}</short>
+        <description>{{ firewalld_svc_description }}</description>
+      {% for item in firewalld_svc_ports %}
+        <port protocol="{{ item.protocol }}" port="{{ item.port }}"/>
+      {% endfor %}
+      </service>
+    dest: "/etc/firewalld/services/{{ firewalld_svc_name }}.xml"
+    owner: "root"
+    group: "root"
+    mode: "u=rw,g=r,o=r"
+
+- name: "Reload firewalld"
+  service:
+    name: firewalld
+    state: reloaded
+    enabled: yes
+
+- name: "Ensure firewalld is running"
+  service:
+    name: firewalld
+    state: started
