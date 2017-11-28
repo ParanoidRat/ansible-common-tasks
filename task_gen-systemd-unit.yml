@@ -17,6 +17,7 @@
       ExecStart={{ gen_systemd_unit_exec }}
       Restart=always
       TimeoutSec=3
+      TimeoutStopSec=10
       StandardOutput=syslog
       StandardError=syslog
       SyslogIdentifier={{ gen_systemd_unit_name }}
