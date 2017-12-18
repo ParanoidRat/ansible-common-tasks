@@ -22,21 +22,28 @@
 #             backup: yes
 #
 ---
-# Create all destination folders
-- name: Ensure template destinations exist
+- name: "Compile list of destination dirs"
+  set_fact:
+    tmp_dest_dirs: "{{ tmp_dest_dirs | default([]) }} + [ '{{ item.dest | dirname }}' ]"
+  with_items: "{{ expand_templates_list }}"
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: "Trim destination dirs to unique items"
+  set_fact:
+    tmp_dest_dirs: "{{ tmp_dest_dirs | unique }}"
+
+- name: "Ensure template destination dirs exist"
   file:
-    path:     "{{ item.dest | dirname }}"
-    owner:    "{{ item.owner }}"
-    group:    "{{ item.group }}"
+    path:     "{{ item }}"
+    owner:    "root"
+    group:    "root"
     mode:     "u=rwx,g=rx,o=rx"
     state:    directory
     recurse:  no
-  with_items: "{{ expand_templates_list }}"
-  loop_control:
-    label: "{{ item.dest | dirname }}"
+  with_items: "{{ tmp_dest_dirs }}"
 
-# Go through template list and notify handler upon completion (if defined)
-- name: Expand templates on target
+- name: "Expand templates on target host"
   template:
     src:      "{{ item.src }}"
     dest:     "{{ item.dest }}"
