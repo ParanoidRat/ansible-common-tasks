@@ -29,4 +29,6 @@
     group: "{{ item.group }}"
     mode:  "{{ item.mode }}"
   with_items: "{{ copy_files_list }}"
+  loop_control:
+    label: "{{ item.dest }}"
   notify: "{{ copy_files_handler | default(omit) }}"
