@@ -9,19 +9,39 @@
 #         msg: Service restarted
 #
 #   tasks:
-#     - import_tasks: task_copy_files.yml
+#     - import_tasks: task_copy-files.yml
 #       vars:
 #         copy_files_handler: "Restart service"
 #         copy_files_list:
-#           - src:   "/source/file.1"
-#             dest:  "/target/file.1"
-#             owner: "user"
-#             group: "group"
-#             mode:  "u=rw,g=r,o=r"
+#           - src:   /source/file.1
+#             dest:  /target/file.1
+#             owner: user
+#             group: group
+#             mode:  u=rw,g=r,o=r
 #
 ---
-# Go through file list and upon completion notify handler if defined
-- name: Copy files to target
+- name: "Compile list of destination dirs"
+  set_fact:
+    tmp_copy_files_dest_dirs: "{{ tmp_copy_files_dest_dirs | default([]) }} + [ '{{ item.dest | dirname }}' ]"
+  with_items: "{{ copy_files_list }}"
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: "Trim destination dirs to unique items"
+  set_fact:
+    tmp_copy_files_dest_dirs: "{{ tmp_copy_files_dest_dirs | unique }}"
+
+- name: "Ensure destination dirs exist"
+  file:
+    path:     "{{ item }}"
+    owner:    "root"
+    group:    "root"
+    mode:     "u=rwx,g=rx,o=rx"
+    state:    directory
+    recurse:  no
+  with_items: "{{ tmp_copy_files_dest_dirs }}
+
+- name: "Copy files to target"
   copy:
     src:   "{{ item.src }}"
     dest:  "{{ item.dest }}"
