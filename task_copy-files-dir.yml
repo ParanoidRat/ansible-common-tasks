@@ -34,7 +34,7 @@
     path: "{{ copy_files_dir_dst }}"
     owner: "{{ copy_files_dir_owner }}"
     group: "{{ copy_files_dir_group }}"
-    mode: "{{ copy_files_dir_mode }}"
+    mode: u=rwx,g=rx,o=rx
     state: directory
     recurse: no
 
@@ -45,5 +45,4 @@
     owner: "{{ copy_files_dir_owner }}"
     group: "{{ copy_files_dir_group }}"
     mode:  "{{ copy_files_dir_mode }}"
-    directory_mode: "{{ copy_files_dir_mode }}"
   notify: "{{ copy_files_dir_handler | default(omit) }}"

@@ -42,7 +42,7 @@
     path:     "{{ expand_templates_dir_dst }}"
     owner:    "{{ expand_templates_dir_owner }}"
     group:    "{{ expand_templates_dir_group }}"
-    mode:     "{{ expand_templates_dir_mode }}"
+    mode:     u=rwx,g=rx,o=rx
     state:    directory
     recurse:  no
 
