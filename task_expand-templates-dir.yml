@@ -1,0 +1,62 @@
+# Expands all templates from local {{ expand_templates_dir_src }} to remote
+# {{ expand_templates_dir_dst }}
+#     - if {{ expand_templates_dir_dst_clear }} == yes, deletes {{ expand_templates_dir_dst }}
+#       prior to copying
+#     - ensures that {{ expand_templates_dir_dst }} exists
+#     - if {{ expand_templates_dir_backup }} == yes, makes backup of remote
+#       files to be replaced
+#     - if {{ expand_templates_dir_validate }} is defined, runs verification
+#       for each file
+#     - if defined, notifies {{ expand_templates_dir_handler }} upon completion
+# Expects {{ expand_templates_dir_src }} to __end with__ `/`
+#
+#  Usage example
+#
+#   handlers:
+#     - name: restart service
+#       debug:
+#         msg: Service restarted
+#
+#   tasks:
+#     - import_tasks: task_expand-templates-dir.yml
+#       vars:
+#         expand_templates_dir_src: /path/to/local/source/
+#         expand_templates_dir_dst: /path/to/remote/target/
+#         expand_templates_dir_dst_clear: no
+#         expand_templates_dir_owner: user
+#         expand_templates_dir_group: group
+#         expand_templates_dir_mode:  u=rw,g=r,o=r
+#         expand_templates_dir_handler: restart service
+#         expand_templates_dir_validate: "/usr/bin/validate.sh %s"
+#         expand_templates_dir_backup: no
+#
+---
+- name: "Clear remote destination :: {{ expand_templates_dir_dst }}"
+  file:
+    path: "{{ expand_templates_dir_dst }}"
+    state: absent
+  when: expand_templates_dir_dst_clear | default( no )
+
+- name: "Ensure remote destination exists :: {{ expand_templates_dir_dst }}"
+  file:
+    path:     "{{ expand_templates_dir_dst }}"
+    owner:    "{{ expand_templates_dir_owner }}"
+    group:    "{{ expand_templates_dir_group }}"
+    mode:     "{{ expand_templates_dir_mode }}"
+    state:    directory
+    recurse:  no
+
+- name: "Expand templates :: {{ expand_templates_dir_src.split('/')[-2] }} -> {{ expand_templates_dir_dst }}"
+  template:
+    src:   "{{ expand_templates_dir_item }}"
+    dest:  "{{ expand_templates_dir_dst + (expand_templates_dir_item | basename) }}"
+    owner: "{{ expand_templates_dir_owner }}"
+    group: "{{ expand_templates_dir_group }}"
+    mode:  "{{ expand_templates_dir_mode }}"
+    validate: "{{ expand_templates_dir_validate | default(omit) }}"
+    backup:   "{{ expand_templates_dir_backup | default(omit) }}"
+  with_fileglob:
+    - "{{ expand_templates_dir_src + '*' }}"
+  loop_control:
+    label: "{{ expand_templates_dir_item | basename }}"
+    loop_var: expand_templates_dir_item
