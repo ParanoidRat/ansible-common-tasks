@@ -40,5 +40,5 @@
     hold_pkg_name: "{{ item }}"
   when:
     - install_from_repo_state == present
-    - install_from_repo_hold | default (no)
+    - install_from_repo_hold | default (false)
   with_items: "{{ install_from_repo_packages }}"
