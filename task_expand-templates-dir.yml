@@ -18,7 +18,7 @@
 #         msg: Service restarted
 #
 #   tasks:
-#     - import_tasks: task_expand-templates-dir.yml
+#     - import_tasks: tasks/task_expand-templates-dir.yml
 #       vars:
 #         expand_templates_dir_src: /path/to/local/source/
 #         expand_templates_dir_dst: /path/to/remote/target/

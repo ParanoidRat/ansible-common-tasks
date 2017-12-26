@@ -4,7 +4,7 @@
 #  Usage example
 #
 #  tasks:
-#    - import_tasks: task_install-from-pkgs.yml
+#    - import_tasks: tasks/task_install-from-pkgs.yml
 #      vars:
 #        install_from_pkgs_debug: yes
 #        install_from_pkgs_cachedir: "/tmp"

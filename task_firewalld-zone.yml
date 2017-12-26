@@ -7,7 +7,7 @@
 # Usage example
 #
 #   tasks:
-#   - import_tasks: task_firewalld-zone.yml
+#   - import_tasks: tasks/task_firewalld-zone.yml
 #     become: yes
 #     vars:
 #       firewalld_zone_only: no

@@ -43,7 +43,7 @@
 #  Usage example
 #
 #  tasks:
-#    - import_tasks: task_install-from-repo.yml
+#    - import_tasks: tasks/task_install-from-repo.yml
 #      vars:
 #        install_from_repo_packages: "{{ common_pkgs + os_specific_pkgs }}"
 ---

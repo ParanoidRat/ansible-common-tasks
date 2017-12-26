@@ -5,7 +5,7 @@
 # Usage example
 #
 # tasks:
-#   - import_tasks: task_add-repo.yml
+#   - import_tasks: tasks/task_add-repo.yml
 #     vars:
 #       add_repo_name: "Elastic-5.x"
 #       add_repo_url_key: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"

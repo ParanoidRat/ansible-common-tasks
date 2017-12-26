@@ -13,7 +13,7 @@
 #         msg: Service restarted
 #
 #   tasks:
-#     - import_tasks: task_copy-files-dir.yml
+#     - import_tasks: tasks/task_copy-files-dir.yml
 #       vars:
 #         copy_files_dir_handler: restart service
 #         copy_files_dir_src:   /path/to/local/source/

@@ -3,7 +3,7 @@
 # Usage example
 #
 #   tasks:
-#   - import_tasks: task_remove-ufw.yml
+#   - import_tasks: tasks/task_remove-ufw.yml
 #     become: yes
 #
 ---
@@ -20,7 +20,7 @@
     masked: yes
 
 # Ensure ufw is not installed to avoid conflicts
-- import_tasks: task_remove-pkgs.yml
+- import_tasks: tasks/task_remove-pkgs.yml
   vars:
     remove_pkgs_list:
       - ufw

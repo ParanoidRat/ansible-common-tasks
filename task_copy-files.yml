@@ -9,7 +9,7 @@
 #         msg: Service restarted
 #
 #   tasks:
-#     - import_tasks: task_copy-files.yml
+#     - import_tasks: tasks/task_copy-files.yml
 #       vars:
 #         copy_files_handler: "Restart service"
 #         copy_files_list:
