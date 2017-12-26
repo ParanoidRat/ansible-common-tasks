@@ -41,9 +41,9 @@
 - name: "Assert Java is operational"
   assert:
     that:
-      - install_jdk_version_test.rc == 0
-      - "('version' in install_jdk_version_test.stderr)"
-      - "('Runtime Environment' in install_jdk_version_test.stderr)"
+      - "install_jdk_version_test.rc == 0"
+      - "'version' in install_jdk_version_test.stderr"
+      - "'Runtime Environment' in install_jdk_version_test.stderr"
 
 # Workaround for OpenJDK [issue][1] on Ubuntu from 2015
 # -   ubuntu package has broken cacerts
