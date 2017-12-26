@@ -1,0 +1,53 @@
+# Install Java platform for either RedHat or Debian family OS.
+# -   Java platform and version are defined with `{{ }}`
+# If no version is specified, latest is installed. Version is specified as
+# -   package=1.1 for Debian
+# -   package-1.1 for RedHat
+#
+#  Usage example
+#
+#  tasks:
+#    - import_tasks: tasks/task_install-from-repo.yml
+#      vars:
+#        install_from_repo_state: present
+#        install_from_repo_hold: yes
+#        install_from_repo_packages:
+#          - syslog-ng-3.11.1
+#          - mc-4.8.7
+---
+- name: "Set Java install state to 'present'..."
+  set_fact:
+    install_jdk_state: present
+
+- name: "...or 'latest' if upgrading"
+  set_fact:
+    install_jdk_state: latest
+  when: install_jdk_update | default(no)
+
+- name: "Set Java platform to OpenJDK 8 if not defined"
+  set_fact:
+    install_jdk_package: "{% if ansible_os_family == 'RedHat' %}java-1.8.0-openjdk{% elif ansible_os_family == 'Debian' %}openjdk-8-jre-headless{% else %}UNKNOWN{% endif %}"
+  when: install_jdk_package is undefined
+
+# Install specific Java version from repository
+- import_tasks: task_install-from-repo.yml
+  vars:
+    install_from_repo_packages: "{{ install_jdk_package }}"
+    install_from_repo_state: "{{ install_jdk_state }}"
+
+- name: "Check Java presence and version"
+  command: java -version
+  register: install_jdk_version_test
+  ignore_errors: yes
+  changed_when: false
+
+# Workaround for OpenJDK in Ubuntu issue from 2015
+#   ubuntu package has broken cacerts
+#   https://github.com/docker-library/openjdk/issues/19
+- name: "Refresh OpenJDK ca-certificates (Ubuntu)"
+  become: yes
+  command: /var/lib/dpkg/info/ca-certificates-java.postinst configure
+  changed_when: false
+  when:
+    - ansible_distribution == 'Ubuntu'
+    - "'OpenJDK Runtime Environment' in install_jdk_version_test.stderr"
