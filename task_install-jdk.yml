@@ -1,19 +1,16 @@
-# Install Java platform for either RedHat or Debian family OS.
-# -   Java platform and version are defined with `{{ }}`
-# If no version is specified, latest is installed. Version is specified as
-# -   package=1.1 for Debian
-# -   package-1.1 for RedHat
+# Install Java for either RedHat or Debian family OS.
+# -   Specific platform and version are defined with `install_jdk_package`
+#     If no version is specified, latest OpenJDK 8 is installed.
+# -   Could be used to update Java platform with `install_jdk_update: yes`
+# -   Verifies that Java platform is operational
 #
 #  Usage example
 #
 #  tasks:
-#    - import_tasks: tasks/task_install-from-repo.yml
+#    - import_tasks: tasks/task_install-jdk.yml
 #      vars:
-#        install_from_repo_state: present
-#        install_from_repo_hold: yes
-#        install_from_repo_packages:
-#          - syslog-ng-3.11.1
-#          - mc-4.8.7
+#        install_jdk_update: no
+#        install_jdk_package: java-1.7.0-openjdk
 ---
 - name: "Set Java install state to 'present'..."
   set_fact:
@@ -22,7 +19,7 @@
 - name: "...or 'latest' if upgrading"
   set_fact:
     install_jdk_state: latest
-  when: install_jdk_update | default(no)
+  when: install_jdk_update | default( false )
 
 - name: "Set Java platform to OpenJDK 8 if not defined"
   set_fact:
@@ -35,16 +32,23 @@
     install_from_repo_packages: "{{ install_jdk_package }}"
     install_from_repo_state: "{{ install_jdk_state }}"
 
-- name: "Check Java presence and version"
+- name: "Get Java version"
   command: java -version
   register: install_jdk_version_test
   ignore_errors: yes
   changed_when: false
 
-# Workaround for OpenJDK in Ubuntu issue from 2015
-#   ubuntu package has broken cacerts
-#   https://github.com/docker-library/openjdk/issues/19
-- name: "Refresh OpenJDK ca-certificates (Ubuntu)"
+- name: "Assert Java is operational"
+  assert:
+    that:
+      - install_jdk_version_test.rc == 0
+      - "('version' in install_jdk_version_test.stderr)"
+      - "('Runtime Environment' in install_jdk_version_test.stderr)"
+
+# Workaround for OpenJDK [issue][1] on Ubuntu from 2015
+# -   ubuntu package has broken cacerts
+# [1]: https://github.com/docker-library/openjdk/issues/19
+- name: "Fix :: Ubuntu :: Refresh OpenJDK ca-certificates"
   become: yes
   command: /var/lib/dpkg/info/ca-certificates-java.postinst configure
   changed_when: false
