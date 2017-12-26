@@ -1,0 +1,35 @@
+# Prevent upgrade for installed packages in either RedHat- or Debian-based OS.
+# Version could be specified only for RedHat as `package-1.1`. For Debian,
+# packages would be held at current version
+#
+#  Usage example
+#
+#  tasks:
+#    - import_tasks: tasks/task_hold-pkgs.yml
+#      vars:
+#        hold_pkgs_list:
+#          - syslog-ng
+#          - mc
+---
+- name: "Ensure yum-versionlock available (yum)"
+  become: yes
+  yum:
+    name: yum-plugin-versionlock
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: "Hold packages at current state (yum)"
+  become: yes
+  command: "yum versionlock add {{ item }}"
+  register: hold_pkgs_result
+  changed_when: 'versionlock added: 0' not in hold_pkgs_result.stdout
+  when: ansible_os_family == "RedHat"
+  with_items: "{{ install_from_repo_packages }}"
+
+- name: "Hold packages at current state (apt)"
+  become: yes
+  command: "apt-mark hold {{ item }}"
+  register: hold_pkgs_result
+  changed_when: 'was already set on hold' not in hold_pkgs_result.stdout
+  when: ansible_os_family == "Debian"
+  with_items: "{{ hold_pkgs_list }}"
