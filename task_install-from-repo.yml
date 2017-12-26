@@ -20,7 +20,7 @@
   become: yes
   apt:
     force: yes
-    state: "{{ install_from_repo_state | default (present) }}"
+    state: "{{ install_from_repo_state | default ('present') }}"
     name: "{{ item }}"
   when: ansible_os_family == "Debian"
   with_items: "{{ install_from_repo_packages }}"
@@ -29,7 +29,7 @@
   become: yes
   yum:
     allow_downgrade: yes
-    state: "{{ install_from_repo_state | default (present) }}"
+    state: "{{ install_from_repo_state | default ('present') }}"
     name: "{{ item }}"
   when: ansible_os_family == "RedHat"
   with_items: "{{ install_from_repo_packages }}"
