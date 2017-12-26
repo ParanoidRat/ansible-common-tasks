@@ -34,9 +34,9 @@
   when: ansible_os_family == "RedHat"
   with_items: "{{ install_from_repo_packages }}"
 
-# If required, hold packages version
+# If required, freeze versions
 - include_tasks: task_hold-pkg.yml
   vars:
     hold_pkg_name: "{{ item }}"
-  when: (install_from_repo_state == 'present') and (install_from_repo_hold | default (false))
+  when: install_from_repo_hold | default (false)
   with_items: "{{ install_from_repo_packages }}"
