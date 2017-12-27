@@ -15,6 +15,7 @@
 #
 ---
 - name: "Generate service file :: {{ firewalld_svc_name }}"
+  become: yes
   copy:
     content: |
       <?xml version="1.0" encoding="utf-8"?>
@@ -31,6 +32,7 @@
     mode: "u=rw,g=r,o=r"
 
 - name: "Reload firewalld"
+  become: yes
   service:
     name: firewalld
     state: reloaded

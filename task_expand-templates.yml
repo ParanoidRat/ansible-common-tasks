@@ -34,6 +34,7 @@
     tmp_dest_dirs: "{{ tmp_dest_dirs | unique }}"
 
 - name: "Ensure template destination dirs exist"
+  become: yes
   file:
     path:     "{{ item }}"
     owner:    "root"
@@ -44,6 +45,7 @@
   with_items: "{{ tmp_dest_dirs }}"
 
 - name: "Expand templates on target host"
+  become: yes
   template:
     src:      "{{ item.src }}"
     dest:     "{{ item.dest }}"

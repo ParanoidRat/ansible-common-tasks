@@ -32,6 +32,7 @@
     tmp_copy_files_dest_dirs: "{{ tmp_copy_files_dest_dirs | unique }}"
 
 - name: "Ensure destination dirs exist"
+  become: yes
   file:
     path:     "{{ item }}"
     owner:    "root"
@@ -42,6 +43,7 @@
   with_items: "{{ tmp_copy_files_dest_dirs }}
 
 - name: "Copy files to target"
+  become: yes
   copy:
     src:   "{{ item.src }}"
     dest:  "{{ item.dest }}"

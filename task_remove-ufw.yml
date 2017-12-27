@@ -8,6 +8,7 @@
 #
 ---
 - name: "Stop iptables if in use"
+  become: yes
   service:
     name: iptables
     state: stopped
@@ -15,6 +16,7 @@
   failed_when: "command_result|failed and ('find' not in command_result.msg and 'found' not in command_result.msg)"
 
 - name: "Mask iptables in systemd"
+  become: yes
   systemd:
     name: iptables
     masked: yes

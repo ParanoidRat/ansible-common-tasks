@@ -16,6 +16,7 @@
 ---
 # Add APT key for Debian-based OS
 - name: Install key for {{ add_repo_name }} repo (apt)
+  become: yes
   apt_key:
     state: present
     url: "{{ add_repo_url_key }}"
@@ -23,6 +24,7 @@
 
 # Add YUM key for RedHat-based OS
 - name: Install key for {{ add_repo_name }} repo (rpm)
+  become: yes
   rpm_key:
     state: present
     key: "{{ add_repo_url_key }}"
@@ -30,6 +32,7 @@
 
 # Add APT repo for Debian-based OS
 - name: Add {{ add_repo_name }} repo (apt)
+  become: yes
   apt_repository:
     state: present
     repo: "{{ item }}"
@@ -39,6 +42,7 @@
 
 # Add YUM repo for RedHat-based OS
 - name: Add {{ add_repo_name }} repo (yum)
+  become: yes
   yum_repository:
     state: present
     name: "{{ add_repo_name }}"

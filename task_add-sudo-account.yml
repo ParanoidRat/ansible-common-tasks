@@ -17,17 +17,20 @@
 #
 ---
 - name: "Ensure account group exists"
+  become: yes
   group:
     name: "{{ sudo_account_name }}"
     state: present
 
 - name: "Get account info, if exists"
+  become: yes
   getent:
     database: passwd
     key: "{{ sudo_account_name }}"
     fail_key: no
 
 - name: "Create account, if doesn't exist"
+  become: yes
   user:
     uid: "{{ sudo_account_uid | default(omit) }}"
     name: "{{ sudo_account_name }}"
@@ -38,6 +41,7 @@
   when: getent_passwd[sudo_account_name] | string == "None"
 
 - name: "Place authorized keys for account"
+  become: yes
   authorized_key:
     user: "{{ sudo_account_name }}"
     key: "{{ item }}"
@@ -45,6 +49,7 @@
   - "{{ sudo_account_ssh_key }}"
 
 - name: "Ensure /etc/sudoers.d/ exists"
+  become: yes
   file:
     path: /etc/sudoers.d
     owner: root
@@ -53,6 +58,7 @@
     state: directory
 
 - name: "Ensure /etc/sudoers.d/ referred in /etc/sudoers"
+  become: yes
   lineinfile:
     dest: /etc/sudoers
     line: "#includedir /etc/sudoers.d"
@@ -60,6 +66,7 @@
     validate: "/usr/sbin/visudo -cf %s"
 
 - name: "Ensure sudoers.d has directives for account"
+  become: yes
   copy:
     content: |
       #

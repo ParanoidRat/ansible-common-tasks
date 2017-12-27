@@ -10,6 +10,7 @@
 ---
 # Remove packages with generic OS package manager
 - name: "Remove packages"
+  become: yes
   package:
     name: "{{ item }}"
     state: absent

@@ -32,12 +32,14 @@
 #
 ---
 - name: "Clear remote destination :: {{ expand_templates_dir_dst }}"
+  become: yes
   file:
     path: "{{ expand_templates_dir_dst }}"
     state: absent
   when: expand_templates_dir_dst_clear | default( no )
 
 - name: "Ensure remote destination exists :: {{ expand_templates_dir_dst }}"
+  become: yes
   file:
     path:     "{{ expand_templates_dir_dst }}"
     owner:    "{{ expand_templates_dir_owner }}"
@@ -47,6 +49,7 @@
     recurse:  no
 
 - name: "Expand templates :: {{ expand_templates_dir_src.split('/')[-2] }} -> {{ expand_templates_dir_dst }}"
+  become: yes
   template:
     src:   "{{ expand_templates_dir_item }}"
     dest:  "{{ expand_templates_dir_dst + (expand_templates_dir_item | basename) }}"

@@ -24,12 +24,14 @@
 #
 ---
 - name: "Clear remote destination :: {{ copy_files_dir_dst }}"
+  become: yes
   file:
     path: "{{ copy_files_dir_dst }}"
     state: absent
   when: copy_files_dir_dst_clear | default( no )
 
 - name: "Ensure remote destination exists :: {{ copy_files_dir_dst }}"
+  become: yes
   file:
     path: "{{ copy_files_dir_dst }}"
     owner: "{{ copy_files_dir_owner }}"
@@ -39,6 +41,7 @@
     recurse: no
 
 - name: "Copy recursively :: {{ copy_files_dir_src.split('/')[-2] }} -> {{ copy_files_dir_dst }}"
+  become: yes
   copy:
     src:   "{{ copy_files_dir_src }}"
     dest:  "{{ copy_files_dir_dst }}"
