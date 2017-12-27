@@ -5,8 +5,11 @@
 #   tasks:
 #   - import_tasks: tasks/task_gen-systemd-unit.yml
 #     vars:
-#       gen_systemd_unit_name: "nprobe"
-#       gen_systemd_unit_exec: "/usr/local/bin/nprobe /etc/nprobe/nprobe.conf"
+#       gen_systemd_unit_name: nprobe
+#       gen_systemd_unit_exec: /usr/local/bin/nprobe /etc/nprobe/nprobe.conf
+#       gen_systemd_unit_restart: on-failure
+#       gen_systemd_unit_user: nprobe
+#       gen_systemd_unit_group: nprobe
 #
 ---
 # Generate service unit definition for systemd
@@ -16,14 +19,14 @@
     content: |
       [Service]
       ExecStart={{ gen_systemd_unit_exec }}
-      Restart=always
+      Restart={{ gen_systemd_unit_restart | default ('always') }}
       TimeoutSec=3
       TimeoutStopSec=10
       StandardOutput=syslog
       StandardError=syslog
       SyslogIdentifier={{ gen_systemd_unit_name }}
-      User=root
-      Group=root
+      User={{ gen_systemd_unit_user | default ('root') }}
+      Group={{ gen_systemd_unit_group | default ('root') }}
 
       [Install]
       WantedBy=multi-user.target
