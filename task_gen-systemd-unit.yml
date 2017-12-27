@@ -6,6 +6,7 @@
 #   - import_tasks: tasks/task_gen-systemd-unit.yml
 #     vars:
 #       gen_systemd_unit_name: nprobe
+#       gen_systemd_unit_type: forking
 #       gen_systemd_unit_exec: /usr/local/bin/nprobe /etc/nprobe/nprobe.conf
 #       gen_systemd_unit_restart: on-failure
 #       gen_systemd_unit_user: nprobe
@@ -19,6 +20,9 @@
   copy:
     content: |
       [Service]
+      {% if gen_systemd_unit_type is defined %}
+      Type={{ gen_systemd_unit_type }}
+      {% endif %}
       ExecStart={{ gen_systemd_unit_exec }}
       Restart={{ gen_systemd_unit_restart | default ('always') }}
       TimeoutSec=3
@@ -31,6 +35,7 @@
       {% if gen_systemd_unit_pid is defined %}
       PIDFile={{ gen_systemd_unit_pid }}
       {% endif %}
+
       [Install]
       WantedBy=multi-user.target
     dest: "/etc/systemd/system/{{ gen_systemd_unit_name }}.service"
