@@ -10,6 +10,7 @@
 #       gen_systemd_unit_restart: on-failure
 #       gen_systemd_unit_user: nprobe
 #       gen_systemd_unit_group: nprobe
+#       gen_systemd_unit_pid: /var/tmp/nprobe.pid
 #
 ---
 # Generate service unit definition for systemd
@@ -27,7 +28,9 @@
       SyslogIdentifier={{ gen_systemd_unit_name }}
       User={{ gen_systemd_unit_user | default ('root') }}
       Group={{ gen_systemd_unit_group | default ('root') }}
-
+      {% if gen_systemd_unit_pid is defined %}
+      PIDFile={{ gen_systemd_unit_pid }}
+      {% endif %}
       [Install]
       WantedBy=multi-user.target
     dest: "/etc/systemd/system/{{ gen_systemd_unit_name }}.service"
