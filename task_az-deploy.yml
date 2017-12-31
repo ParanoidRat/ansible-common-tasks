@@ -1,6 +1,9 @@
-# Deploys an ARM template to pre-defined subscription, location and
+# Deploy an ARM template to pre-defined subscription, location and
 # Resource Group using Azure CLI through local_action.
 #
+# -    For debugging purposes, output verbosity could be increased wtih
+#      `az_builder_debug: yes`
+# -    If az_builder_skip_deployment is
 #  Usage example
 #
 #   tasks:
@@ -14,7 +17,6 @@
 #         az_deploy_resgroup: VPN
 #
 ---
-# Ensure right subscription ID is used
 - name: "Set Azure subscription ID"
   local_action: |
     command /usr/bin/az
@@ -22,7 +24,6 @@
       --output json
       --subscription {{ az_deploy_subscriptionId | quote }}
 
-# Create required Resource Group if does not exist
 - name: "Ensure Azure resource group is created"
   local_action: |
     command /usr/bin/az
@@ -34,20 +35,20 @@
   until: (azout_group_create.stdout | from_json).properties.provisioningState == 'Succeeded'
   retries: 5
   delay: 1
+  when: not az_builder_skip_deployment | default(false)
 
 # Fail if Resource Group is not in correct provisioning state
 - assert:
    that:
      - "'Succeeded' in azout_group_create.stdout"
+  when: not az_builder_skip_deployment | default(false)
 
 # DEBUG
 - debug:
     msg:
     - "{{ azout_group_create.stdout }}"
-  when: az_builder_debug
-  tags: debug
+  when: az_builder_debug and not az_builder_skip_deployment | default(false)
 
-# Deploy to subscription, resource group and location defined above
 - name: "Deploy ARM template"
   local_action: |
     command /usr/bin/az
@@ -58,10 +59,10 @@
       --template-uri {{ az_deploy_url | quote }}
       --parameters @{{ az_deploy_params | quote }}
   register: azout_group_deployment_create
+  when: not az_builder_skip_deployment | default(false)
 
 # DEBUG
 - debug:
     msg:
     - "{{ azout_group_deployment_create }}"
-  when: az_builder_debug
-  tags: debug
+  when: az_builder_debug and not az_builder_skip_deployment | default(false)
