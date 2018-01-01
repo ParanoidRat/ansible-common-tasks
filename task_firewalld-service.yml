@@ -39,6 +39,7 @@
     enabled: yes
 
 - name: "Ensure firewalld is running"
+  become: yes
   service:
     name: firewalld
     state: started
