@@ -6,7 +6,7 @@
 #    - import_tasks: tasks/task_remove-pkgs.yml
 #      vars:
 #        remove_pkgs_list:
-  #        - "mc"
+#          - "mc"
 ---
 # Remove packages with generic OS package manager
 - name: "Remove packages"
