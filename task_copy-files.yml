@@ -34,22 +34,22 @@
 - name: "Ensure destination dirs exist"
   become: yes
   file:
-    path:     "{{ item }}"
-    owner:    "root"
-    group:    "root"
-    mode:     "u=rwx,g=rx,o=rx"
-    state:    directory
-    recurse:  no
-  with_items: "{{ tmp_copy_files_dest_dirs }}
+    path: "{{ item }}"
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+    state: directory
+    recurse: no
+  with_items: "{{ tmp_copy_files_dest_dirs }}"
 
 - name: "Copy files to target"
   become: yes
   copy:
-    src:   "{{ item.src }}"
-    dest:  "{{ item.dest }}"
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
     owner: "{{ item.owner }}"
     group: "{{ item.group }}"
-    mode:  "{{ item.mode }}"
+    mode: "{{ item.mode }}"
   with_items: "{{ copy_files_list }}"
   loop_control:
     label: "{{ item.dest }}"
